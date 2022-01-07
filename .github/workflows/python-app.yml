@@ -15,15 +15,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
           python-version: "3.8.10"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
       - name: Generate html and deploy
         env:
           ODDS_API_KEY_REPO: ${{ secrets.ODDS_API_KEY_REPO }}
         run: python odds.py
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: /
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
