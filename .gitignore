@@ -1,6 +1,7 @@
 .vscode
 SECRET.txt
 index.html
+public
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
