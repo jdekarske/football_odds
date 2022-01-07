@@ -104,6 +104,8 @@ central_time = (
 )
 assign_scores = pd.concat([central_time, assign_scores], axis=1)
 
+os.makedirs('public') 
+
 with open("public/index.html", "w") as fo:
     fo.write(
         template.render(
