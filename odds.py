@@ -104,6 +104,11 @@ central_time = (
 )
 assign_scores = pd.concat([central_time, assign_scores], axis=1)
 
+#don't display the timezone
+assign_scores["Commence Time (CT)"] = assign_scores["Commence Time (CT)"].dt.tz_localize(None)
+assign_scores["Commence Time (UTC)"] = assign_scores["Commence Time (UTC)"].dt.tz_localize(None)
+
+
 os.makedirs('public') 
 
 with open("public/index.html", "w") as fo:
