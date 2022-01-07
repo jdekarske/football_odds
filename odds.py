@@ -111,7 +111,8 @@ with open("public/index.html", "w") as fo:
         template.render(
             last_update=start_date,
             odds_table=assign_scores.to_html(
-                classes=["table table-striped table-dark table-hover"]
+                justify='left',
+                classes=["table table-striped table-dark table-hover table-sm"]
             ),
         )
     )
