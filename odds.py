@@ -91,7 +91,7 @@ assign_scores.rename(
     columns={
         "commence_time": "Commence Time (UTC)",
         "name": "Team Name",
-        "point": "Spread",
+        "point": "Avg Spread",
         "score": "Score",
     },
     inplace=True,
@@ -114,7 +114,7 @@ os.makedirs('public')
 with open("public/index.html", "w") as fo:
     fo.write(
         template.render(
-            last_update=start_date,
+            last_update=start_date.strftime('%b %-d %Y %H:%M:%S'),
             odds_table=assign_scores.to_html(
                 justify='left',
                 classes=["table table-striped table-dark table-hover table-sm"]
