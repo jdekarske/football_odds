@@ -104,7 +104,7 @@ central_time = (
 )
 assign_scores = pd.concat([central_time, assign_scores], axis=1)
 
-with open("index.html", "w") as fo:
+with open("public/index.html", "w") as fo:
     fo.write(
         template.render(
             last_update=start_date,
