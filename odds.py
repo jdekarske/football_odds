@@ -25,6 +25,8 @@ REGIONS = "us"
 MARKETS = "spreads"
 ODDS_FORMAT = "decimal"
 DATE_FORMAT = "iso"
+start_date = datetime.datetime.now(datetime.timezone.utc)
+
 
 def main():
     odds_response = requests.get(
@@ -46,6 +48,15 @@ def main():
     odds_json = odds_response.json()
 
     if not odds_json:
+        os.makedirs("public", exist_ok=True)
+
+        with open("public/index.html", "w") as fo:
+            fo.write(
+                template.render(
+                    last_update=start_date.strftime("%b %-d %Y %H:%M:%S"),
+                    odds_table="<p>Sorry, no football :(</p>",
+                )
+            )
         print("no games available, exiting")
         return
 
@@ -72,10 +83,8 @@ def main():
 
     all_teams = pd.concat([team1, team2])
 
-
     # find the games played this week (current time until tuesday)
     TUESDAY = 1
-    start_date = datetime.datetime.now(datetime.timezone.utc)
     idx = (7 - start_date.weekday() + TUESDAY) % 7
     tue = start_date + datetime.timedelta(idx)
     end_date = tue
@@ -110,23 +119,27 @@ def main():
     )
     assign_scores = pd.concat([central_time, assign_scores], axis=1)
 
-    #don't display the timezone
-    assign_scores["Commence Time (CT)"] = assign_scores["Commence Time (CT)"].dt.tz_localize(None)
-    assign_scores["Commence Time (UTC)"] = assign_scores["Commence Time (UTC)"].dt.tz_localize(None)
+    # don't display the timezone
+    assign_scores["Commence Time (CT)"] = assign_scores[
+        "Commence Time (CT)"
+    ].dt.tz_localize(None)
+    assign_scores["Commence Time (UTC)"] = assign_scores[
+        "Commence Time (UTC)"
+    ].dt.tz_localize(None)
 
-
-    os.makedirs('public') 
+    os.makedirs("public", exist_ok=True)
 
     with open("public/index.html", "w") as fo:
         fo.write(
             template.render(
-                last_update=start_date.strftime('%b %-d %Y %H:%M:%S'),
+                last_update=start_date.strftime("%b %-d %Y %H:%M:%S"),
                 odds_table=assign_scores.to_html(
-                    justify='left',
-                    classes=["table table-striped table-dark table-hover table-sm"]
+                    justify="left",
+                    classes=["table table-striped table-dark table-hover table-sm"],
                 ),
             )
         )
+
 
 if __name__ == "__main__":
     main()
