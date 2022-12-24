@@ -87,7 +87,7 @@ def main():
     TUESDAY = 1
     idx = (7 - start_date.weekday() + TUESDAY) % 7
     tue = start_date + datetime.timedelta(idx)
-    end_date = tue
+    end_date = tue.replace(hour=8,minute=0,second=0,microsecond=0) # tuesday at 8 UTC
 
     by_week = all_teams[start_date < all_teams["commence_time"]]
     by_week = by_week[by_week["commence_time"] < end_date]
