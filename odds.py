@@ -15,7 +15,7 @@ template = env.get_template("template.html")
 # either use an api key from github or local
 API_KEY = os.getenv("ODDS_API_KEY_REPO")
 
-if API_KEY == None:
+if API_KEY is None:
     print("API key not found in env, using SECRET.txt")
     with open("SECRET.txt", "r") as file:
         API_KEY = file.read()
@@ -66,7 +66,8 @@ def main():
     print("Remaining requests", odds_response.headers["x-requests-remaining"])
     print("Used requests", odds_response.headers["x-requests-used"])
 
-    df = pd.json_normalize(odds_json, record_path="bookmakers", meta="commence_time")
+    df = pd.json_normalize(
+        odds_json, record_path="bookmakers", meta="commence_time")
     start_time = pd.to_datetime(df["commence_time"].str.strip())
 
     df = pd.json_normalize(df["markets"].to_list())
@@ -87,7 +88,8 @@ def main():
     TUESDAY = 1
     idx = (7 - start_date.weekday() + TUESDAY) % 7
     tue = start_date + datetime.timedelta(idx)
-    end_date = tue.replace(hour=8,minute=0,second=0,microsecond=0) # tuesday at 8 UTC
+    end_date = tue.replace(hour=8, minute=0, second=0,
+                           microsecond=0)  # tuesday at 8 UTC
 
     by_week = all_teams[start_date < all_teams["commence_time"]]
     by_week = by_week[by_week["commence_time"] < end_date]
@@ -97,8 +99,10 @@ def main():
     by_week.sort_values("point", inplace=True)
     by_week = by_week.reset_index()
 
-    scores = pd.DataFrame(np.arange(1, len(by_week) / 2 + 1), columns=["score"])
-    scores = pd.concat([scores[::-1], scores]).reset_index().drop(columns="index")
+    scores = pd.DataFrame(
+        np.arange(1, len(by_week) / 2 + 1), columns=["score"])
+    scores = pd.concat([scores[::-1], scores]
+                       ).reset_index().drop(columns="index")
 
     assign_scores = pd.concat([by_week, scores], axis=1)
     assign_scores.drop(["price"], axis=1, inplace=True)
@@ -135,7 +139,8 @@ def main():
                 last_update=start_date.strftime("%b %-d %Y %H:%M:%S"),
                 odds_table=assign_scores.to_html(
                     justify="left",
-                    classes=["table table-striped table-dark table-hover table-sm"],
+                    classes=[
+                        "table table-striped table-dark table-hover table-sm"],
                 ),
             )
         )
