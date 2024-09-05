@@ -1,4 +1,4 @@
-black==24.8.0s
+black==24.8.0
 Jinja2==3.1.4
 pandas==2.2.2
 requests==2.32.3
