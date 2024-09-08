@@ -145,6 +145,11 @@ def main():
             )
         )
 
+    with open("public/odds.json", "w") as fo:
+        fo.write(
+            assign_scores.to_json(orient="records")
+        )
+
 
 if __name__ == "__main__":
     main()
