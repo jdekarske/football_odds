@@ -123,6 +123,20 @@ def main():
     )
     assign_scores = pd.concat([central_time, assign_scores], axis=1)
 
+    assign_scores["Team Name"] = assign_scores["Team Name"].replace("Los Angeles Chargers", "Los Angeles (LAC)")
+    assign_scores["Team Name"] = assign_scores["Team Name"].replace("New York Jets", "New York (NYJ)")
+    assign_scores["Team Name"] = assign_scores["Team Name"].replace("Los Angeles Rams", "Los Angeles (LAR)")
+    assign_scores["Team Name"] = assign_scores["Team Name"].replace("New York Giants", "New York (NYG)")
+
+    def delname(x):
+        if "(" not in x:
+            x = x.rsplit(" ", 1)[0]
+        return x
+
+    assign_scores["Team Name"] = assign_scores["Team Name"].apply(
+        lambda x: delname(x)
+    )
+
     # don't display the timezone
     assign_scores["Commence Time (CT)"] = assign_scores[
         "Commence Time (CT)"
