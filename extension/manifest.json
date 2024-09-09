@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Yahoo Page Reader",
+  "version": "1.0",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.yahoo.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png" // Add an icon if needed
+  }
+}
