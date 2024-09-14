@@ -1,16 +1,17 @@
 {
-  "manifest_version": 2,
-  "name": "Yahoo Page Reader",
+  "manifest_version": 3,
+  "name": "Yahoo Pick Pool Tool",
   "version": "1.0",
   "permissions": ["activeTab"],
   "content_scripts": [
     {
-      "matches": ["*://*.yahoo.com/*"],
+      "matches": ["*://football.fantasysports.yahoo.com/*"],
       "js": ["content.js"]
     }
   ],
-  "browser_action": {
-    "default_popup": "popup.html",
-    "default_icon": "icon.png" // Add an icon if needed
+  "action": {
+    "default_icon": {
+      "48": "arodface-48.png"
+    }
   }
 }
