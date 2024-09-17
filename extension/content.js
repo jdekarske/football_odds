@@ -61,28 +61,37 @@ function readOddsFile() {
                 .map(matchup => ({
                     teamName: matchup["Team Name"],
                     confidencePoints: matchup.Score
-            }));
+                }));
         })
         .catch(error => {
             console.error('Error reading odds file:', error);
         });
 }
 
+function selectFavorites() {
+    rows = document.querySelectorAll('tr.matchup')
+    rows.forEach(r => {
+        r.querySelector('input').checked = true
+    })
+}
+
 function main() {
     const tableBody = document.getElementById('ysf-picks-table').querySelector('tbody');
     const rows = tableBody.querySelectorAll('tr.matchup').length;
-    let points = Array.from({length: rows}, (_, i) => i + 1);
+    let points = Array.from({ length: rows }, (_, i) => i + 1);
     let playedMatchups = extractPlayedMatchups();
     let playedMatchupPoints = playedMatchups.map(matchup => matchup.confidencePoints);
     points = points.filter(point => !playedMatchupPoints.includes(point));
 
     readOddsFile().then(data => {
-        data = data.sort((a, b) => b.confidencePoints - a.confidencePoints);    
+        data = data.sort((a, b) => b.confidencePoints - a.confidencePoints);
         for (let i = 0; i < data.length; i++) {
             data[i].confidencePoints = points[i];
         }
         writeMatchupsToTable(data);
     });
+
+    selectFavorites();
 }
 
 main();
