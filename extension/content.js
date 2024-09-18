@@ -37,10 +37,19 @@ function writeMatchupsToTable(matchups) {
     tableHead.querySelector('tr').appendChild(newTh);
 
     rows.forEach((row, index) => {
+        let correctfavorite = true;
         const favorite = row.querySelector('.favorite a').innerText;
-        const matchup = matchups.find(m => m.teamName === favorite);
+        const underdog = row.querySelector('.underdog a').innerText;
+        let matchup = matchups.find(m => m.teamName === favorite);
         if (!matchup) {
-            return;
+            matchup = matchups.find(m => m.teamName === underdog);
+            if (!matchup) {
+                console.error("team missing");
+                return;
+            }
+            row.querySelector('.underdog-win input').checked = true;
+        } else {
+            row.querySelector('.favorite-win input').checked = true;
         }
         const newCell = document.createElement('td');
         newCell.textContent = matchup.confidencePoints;
@@ -68,13 +77,6 @@ function readOddsFile() {
         });
 }
 
-function selectFavorites() {
-    rows = document.querySelectorAll('tr.matchup')
-    rows.forEach(r => {
-        r.querySelector('input').checked = true
-    })
-}
-
 function main() {
     const tableBody = document.getElementById('ysf-picks-table').querySelector('tbody');
     const rows = tableBody.querySelectorAll('tr.matchup').length;
@@ -90,8 +92,6 @@ function main() {
         }
         writeMatchupsToTable(data);
     });
-
-    selectFavorites();
 }
 
 main();
