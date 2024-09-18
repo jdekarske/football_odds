@@ -40,7 +40,7 @@ function writeMatchupsToTable(matchups) {
         const favorite = row.querySelector('.favorite a').innerText;
         const matchup = matchups.find(m => m.teamName === favorite);
         if (!matchup) {
-            return; // Changed from continue to return
+            return;
         }
         const newCell = document.createElement('td');
         newCell.textContent = matchup.confidencePoints;
@@ -84,7 +84,7 @@ function main() {
     points = points.filter(point => !playedMatchupPoints.includes(point));
 
     readOddsFile().then(data => {
-        data = data.sort((a, b) => b.confidencePoints - a.confidencePoints);
+        data = data.sort((a, b) => a.confidencePoints - b.confidencePoints);
         for (let i = 0; i < data.length; i++) {
             data[i].confidencePoints = points[i];
         }
