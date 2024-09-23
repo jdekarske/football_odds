@@ -25,38 +25,60 @@ function extractPlayedMatchups() {
     return matchups; // Return the matchups data structure
 }
 
-function writeMatchupsToTable(matchups) {
+function writeTeamSelection(matchups) {
     const table = document.getElementById('ysf-picks-table');
-    const tableHead = table.querySelector('thead');
     const tableBody = table.querySelector('tbody');
     const rows = tableBody.querySelectorAll('tr.matchup');
+    const rowsWithSelect = Array.from(rows).filter(row => row.querySelector('select'));
 
-    // Add column name to thead
-    const newTh = document.createElement('th');
-    newTh.textContent = 'Jason Prediction';
-    tableHead.querySelector('tr').appendChild(newTh);
-
-    rows.forEach((row, index) => {
-        let correctfavorite = true;
+    rowsWithSelect.forEach((row) => {
         const favorite = row.querySelector('.favorite a').innerText;
         const underdog = row.querySelector('.underdog a').innerText;
         let matchup = matchups.find(m => m.teamName === favorite);
         if (!matchup) {
             matchup = matchups.find(m => m.teamName === underdog);
             if (!matchup) {
-                console.error("team missing");
+                console.error("team missing:", matchup);
                 return;
             }
             row.querySelector('.underdog-win input').checked = true;
         } else {
             row.querySelector('.favorite-win input').checked = true;
         }
+    });
+}
+
+function writePointsToTable(matchups) {
+    const table = document.getElementById('ysf-picks-table');
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr.alert-row');
+    const rowsWithSelect = Array.from(rows).filter(row => row.querySelector('select'));
+
+    rowsWithSelect.forEach((row, index) => {
+        row.querySelector('select').value = matchups[index].confidencePoints;
+    });
+}
+
+function writeMatchupsToTable(matchups) {
+    const table = document.getElementById('ysf-picks-table');
+    const tableHead = table.querySelector('thead');
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr.matchup');
+    const rowsWithSelect = Array.from(rows).filter(row => row.querySelector('select'));
+
+    // Add column name to thead if it doesn't exist
+    if (!tableHead.querySelector('th:last-child')?.textContent.includes('Jason Prediction')) {
+        const newTh = document.createElement('th');
+        newTh.textContent = 'Jason Prediction';
+        tableHead.querySelector('tr').appendChild(newTh);
+    }
+
+    rowsWithSelect.forEach((row, index) => {
         const newCell = document.createElement('td');
-        newCell.textContent = matchup.confidencePoints;
-        if (matchup.confidencePoints !== parseInt(row.querySelector('select')?.value)) {
-            newCell.style.backgroundColor = 'yellow';
-        }
         row.appendChild(newCell);
+        newCell.textContent = matchups[index].confidencePoints;
+        const currentValue = parseInt(row.querySelector('select')?.value);
+        newCell.style.backgroundColor = matchups[index].confidencePoints !== currentValue ? 'yellow' : '';
     });
 }
 
@@ -91,6 +113,25 @@ function main() {
             data[i].confidencePoints = points[i];
         }
         writeMatchupsToTable(data);
+
+        // Add buttons
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'flex-end';
+        buttonContainer.style.marginBottom = '10px';
+
+        const writePointsButton = document.createElement('button');
+        writePointsButton.textContent = 'Write Points';
+        writePointsButton.onclick = () => writePointsToTable(data);
+        buttonContainer.appendChild(writePointsButton);
+
+        const writeSelectionButton = document.createElement('button');
+        writeSelectionButton.textContent = 'Write Selection';
+        writeSelectionButton.onclick = () => writeTeamSelection(data);
+        buttonContainer.appendChild(writeSelectionButton);
+
+        const picksTable = document.getElementById('ysf-picks-table');
+        picksTable.parentNode.insertBefore(buttonContainer, picksTable);
     });
 }
 
