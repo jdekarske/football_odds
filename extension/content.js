@@ -48,14 +48,16 @@ function writeTeamSelection(matchups) {
     });
 }
 
-function writePointsToTable(matchups) {
+function writePointsToTable() {
     const table = document.getElementById('ysf-picks-table');
     const tableBody = table.querySelector('tbody');
-    const rows = tableBody.querySelectorAll('tr.alert-row');
+    const rows = tableBody.querySelectorAll('tr.matchup');
     const rowsWithSelect = Array.from(rows).filter(row => row.querySelector('select'));
 
     rowsWithSelect.forEach((row, index) => {
-        row.querySelector('select').value = matchups[index].confidencePoints;
+        const lastCell = row.querySelector('td:last-child');
+        const points = parseInt(lastCell.textContent);
+        row.querySelector('select').value = points;
     });
 }
 
@@ -74,11 +76,20 @@ function writeMatchupsToTable(matchups) {
     }
 
     rowsWithSelect.forEach((row, index) => {
+        const favorite = row.querySelector('.favorite a').innerText;
+        const underdog = row.querySelector('.underdog a').innerText;
+
+        const matchup = matchups.find(m => m.teamName === favorite || m.teamName === underdog);
+
+        if (!matchup) {
+            return;
+        }
+        const points = matchup.confidencePoints;
         const newCell = document.createElement('td');
         row.appendChild(newCell);
-        newCell.textContent = matchups[index].confidencePoints;
+        newCell.textContent = points;
         const currentValue = parseInt(row.querySelector('select')?.value);
-        newCell.style.backgroundColor = matchups[index].confidencePoints !== currentValue ? 'yellow' : '';
+        newCell.style.backgroundColor = points !== currentValue ? 'yellow' : '';
     });
 }
 
