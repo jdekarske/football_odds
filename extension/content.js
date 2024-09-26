@@ -129,15 +129,15 @@ function main() {
         buttonContainer.style.justifyContent = 'flex-end';
         buttonContainer.style.marginBottom = '10px';
 
-        const writePointsButton = document.createElement('button');
-        writePointsButton.textContent = 'Write Points';
-        writePointsButton.onclick = () => writePointsToTable(data);
-        buttonContainer.appendChild(writePointsButton);
-
         const writeSelectionButton = document.createElement('button');
         writeSelectionButton.textContent = 'Write Selection';
         writeSelectionButton.onclick = () => writeTeamSelection(data);
         buttonContainer.appendChild(writeSelectionButton);
+
+        const writePointsButton = document.createElement('button');
+        writePointsButton.textContent = 'Write Points';
+        writePointsButton.onclick = () => writePointsToTable(data);
+        buttonContainer.appendChild(writePointsButton);
 
         const picksTable = document.getElementById('ysf-picks-table');
         picksTable.parentNode.insertBefore(buttonContainer, picksTable);
