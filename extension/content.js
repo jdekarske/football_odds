@@ -1,39 +1,50 @@
-function extractPlayedMatchups() {
-    const matchups = [];
-    const rows = document.querySelectorAll('tr.matchup');
-
-    rows.forEach(row => {
-        const confidencePoints = parseInt(row.querySelector('.conf-score') ? row.querySelector('.conf-score').innerText : null);
-        if (isNaN(confidencePoints)) {
-            return;
-        }
-        const gameId = row.querySelector('.info a').id.split('-')[2];
-        const favoriteTeam = row.querySelector('.favorite a').innerText;
-        const underdogTeam = row.querySelector('.underdog a').innerText;
-        const status = row.querySelector('.result') ? row.querySelector('.result').innerText : null;
-
-
-        matchups.push({
-            gameId,
-            favorite: favoriteTeam,
-            underdog: underdogTeam,
-            status,
-            confidencePoints
-        });
-    });
-
-    return matchups; // Return the matchups data structure
-}
-
-function getMatchups() {
+function extractMatchups(isPlayed) {
     const table = document.getElementById('ysf-picks-table');
     const tableBody = table.querySelector('tbody');
     const rows = tableBody.querySelectorAll('tr.matchup');
-    return Array.from(rows).filter(row => row.querySelector('select'));
+    return Array.from(rows).filter(row => isPlayed ? !row.querySelector('select') : row.querySelector('select'));
+}
+
+function extractPlayedMatchups() {
+    return extractMatchups(true);
+}
+
+function extractUnplayedMatchups() {
+    return extractMatchups(false);
+}
+
+function writeSuggestedScores(predictedMatchups) {
+    const table = document.getElementById('ysf-picks-table');
+    const tableHead = table.querySelector('thead');
+    const matchupRows = extractUnplayedMatchups();
+
+    // Add column name to thead if it doesn't exist
+    if (!tableHead.querySelector('th:last-child')?.textContent.includes('Jason Prediction')) {
+        const newTh = document.createElement('th');
+        newTh.textContent = 'Jason Prediction';
+        tableHead.querySelector('tr').appendChild(newTh);
+    }
+
+    matchupRows.forEach((row) => {
+        const favorite = row.querySelector('.favorite a').innerText;
+        const underdog = row.querySelector('.underdog a').innerText;
+
+        const predictedMatchup = predictedMatchups.find(m => m.teamName === favorite || m.teamName === underdog);
+
+        if (!predictedMatchup) {
+            return;
+        }
+
+        const newCell = document.createElement('td');
+        newCell.textContent = predictedMatchup.confidencePoints;
+        const currentValue = parseInt(row.querySelector('select')?.value);
+        newCell.style.backgroundColor = predictedMatchup.confidencePoints !== currentValue ? 'yellow' : '';
+        row.appendChild(newCell);
+    });
 }
 
 function writeTeamSelection(matchups) {
-    const matchupRows = getMatchups();
+    const matchupRows = extractUnplayedMatchups();
 
     matchupRows.forEach((row) => {
         const favorite = row.querySelector('.favorite a').innerText;
@@ -53,7 +64,7 @@ function writeTeamSelection(matchups) {
 }
 
 function writePointsToTable() {
-    const matchupRows = getMatchups();
+    const matchupRows = extractUnplayedMatchups();
 
     matchupRows.forEach((row, index) => {
         const lastCell = row.querySelector('td:last-child');
@@ -62,39 +73,9 @@ function writePointsToTable() {
     });
 }
 
-function writeMatchupsToTable(matchups) {
-    const table = document.getElementById('ysf-picks-table');
-    const tableHead = table.querySelector('thead');
-    const matchupRows = getMatchups();
-
-    // Add column name to thead if it doesn't exist
-    if (!tableHead.querySelector('th:last-child')?.textContent.includes('Jason Prediction')) {
-        const newTh = document.createElement('th');
-        newTh.textContent = 'Jason Prediction';
-        tableHead.querySelector('tr').appendChild(newTh);
-    }
-
-    matchupRows.forEach((row, index) => {
-        const favorite = row.querySelector('.favorite a').innerText;
-        const underdog = row.querySelector('.underdog a').innerText;
-
-        const matchup = matchups.find(m => m.teamName === favorite || m.teamName === underdog);
-
-        if (!matchup) {
-            return;
-        }
-        const points = matchup.confidencePoints;
-        const newCell = document.createElement('td');
-        row.appendChild(newCell);
-        newCell.textContent = points;
-        const currentValue = parseInt(row.querySelector('select')?.value);
-        newCell.style.backgroundColor = points !== currentValue ? 'yellow' : '';
-    });
-}
-
 function readOddsFile() {
     const oddsUrl = 'https://raw.githubusercontent.com/jdekarske/football_odds/gh-pages/odds.json';
-    return fetch(oddsUrl) // Return the promise from fetch
+    return fetch(oddsUrl)
         .then(response => response.json())
         .then(data => {
             return data
@@ -110,10 +91,10 @@ function readOddsFile() {
 }
 
 function main() {
-    const matchupRows = getMatchups();
-    let points = Array.from({ length: matchupRows.length }, (_, i) => i + 1);
-    let playedMatchups = extractPlayedMatchups();
-    let playedMatchupPoints = playedMatchups.map(matchup => matchup.confidencePoints);
+    const unplayedMatchups = extractUnplayedMatchups();
+    const playedMatchups = extractPlayedMatchups();
+    let points = Array.from({ length: unplayedMatchups.length + playedMatchups.length}, (_, i) => i + 1);
+    let playedMatchupPoints = playedMatchups.map(matchup => parseInt(matchup.querySelector('td.score').textContent));
     points = points.filter(point => !playedMatchupPoints.includes(point));
 
     readOddsFile().then(data => {
@@ -121,7 +102,7 @@ function main() {
         for (let i = 0; i < data.length; i++) {
             data[i].confidencePoints = points[i];
         }
-        writeMatchupsToTable(data);
+        writeSuggestedScores(data);
 
         // Add buttons
         const buttonContainer = document.createElement('div');
